@@ -1,0 +1,13 @@
+school_scheduler/
+│
+├── app.py                      # Main entrypoint to launch the software
+├── database/
+│   ├── __init__.py
+│   └── db_manager.py           # SQL Database setup, connections, and seeding
+├── core/
+│   ├── __init__.py
+│   └── scheduler_engine.py     # Smart Substitution engine (The Logic)
+└── ui/
+    ├── __init__.py
+    ├── dashboard.py            # Main operational screen 
+    └── teachers_view.py        # Database management screen for teachers
