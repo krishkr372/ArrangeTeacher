@@ -1,68 +1,47 @@
-import sqlite3
+import os
 import pandas as pd
 
-DB_FILE = "school_system.db"
+TEACHERS_FILE = "data/teachers.xlsx"
+SCHEDULE_FILE = "data/schedule.xlsx"
+SUBSTITUTIONS_FILE = "data/substitutions.xlsx"
 
 def init_db():
-    """Initializes the database with tables and dummy data if empty."""
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
+    """Ensures directories and template files exist with basic fallback data."""
+    os.makedirs("data", exist_ok=True)
     
-    # Create Tables
-    c.execute('''CREATE TABLE IF NOT EXISTS teachers (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                    name TEXT, 
-                    subject TEXT, 
-                    max_daily_load INTEGER
-                )''')
-    
-    c.execute('''CREATE TABLE IF NOT EXISTS schedule (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    day TEXT,
-                    period INTEGER,
-                    class_name TEXT,
-                    subject TEXT,
-                    teacher_id INTEGER
-                )''')
-    
-    c.execute('''CREATE TABLE IF NOT EXISTS substitutions (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    date TEXT,
-                    period INTEGER,
-                    class_name TEXT,
-                    original_teacher_id INTEGER,
-                    sub_teacher_id INTEGER,
-                    reason TEXT
-                )''')
-    
-    # Check if data exists, if not, add dummy data for testing
-    c.execute("SELECT count(*) FROM teachers")
-    if c.fetchone()[0] == 0:
-        teachers_data = [
-            ("Mr. Sharma", "Math", 5),
-            ("Ms. Verma", "Physics", 4),
-            ("Mrs. Gupta", "English", 5),
-            ("Mr. Khan", "History", 4),
-            ("Ms. Iyer", "Math", 5),
-            ("Mr. Singh", "Sports", 6)
-        ]
-        c.executemany("INSERT INTO teachers (name, subject, max_daily_load) VALUES (?,?,?)", teachers_data)
+    if not os.path.exists(TEACHERS_FILE) or os.path.getsize(TEACHERS_FILE) == 0:
+        df = pd.DataFrame([
+            {"id": 1, "name": "Mr. Sharma", "subject": "Math", "max_daily_load": 5},
+            {"id": 2, "name": "Ms. Verma", "subject": "Physics", "max_daily_load": 4},
+            {"id": 3, "name": "Mrs. Gupta", "subject": "English", "max_daily_load": 5},
+            {"id": 4, "name": "Mr. Khan", "subject": "History", "max_daily_load": 4},
+            {"id": 5, "name": "Ms. Iyer", "subject": "Math", "max_daily_load": 5},
+            {"id": 6, "name": "Mr. Singh", "subject": "Sports", "max_daily_load": 6}
+        ])
+        df.to_excel(TEACHERS_FILE, index=False)
         
-        # Create a dummy schedule for "Monday"
-        schedule_data = [
-            ("Monday", 1, "10-A", "Math", 1),
-            ("Monday", 1, "10-B", "Physics", 2),
-            ("Monday", 1, "9-A", "English", 3),
-            ("Monday", 2, "10-A", "History", 4),
-            ("Monday", 2, "10-B", "Math", 5),
-            ("Monday", 2, "9-A", "Sports", 6),
-            ("Monday", 3, "10-A", "Physics", 2), 
-            ("Monday", 3, "10-B", "English", 3)
-        ]
-        c.executemany("INSERT INTO schedule (day, period, class_name, subject, teacher_id) VALUES (?,?,?,?,?)", schedule_data)
-        conn.commit()
+    if not os.path.exists(SCHEDULE_FILE) or os.path.getsize(SCHEDULE_FILE) == 0:
+        df = pd.DataFrame([
+            {"day": "Monday", "period": 1, "class_name": "10-A", "subject": "Math", "teacher_id": 1},
+            {"day": "Monday", "period": 1, "class_name": "10-B", "subject": "Physics", "teacher_id": 2},
+            {"day": "Monday", "period": 1, "class_name": "9-A", "subject": "English", "teacher_id": 3},
+            {"day": "Monday", "period": 2, "class_name": "10-A", "subject": "History", "teacher_id": 4},
+            {"day": "Monday", "period": 2, "class_name": "10-B", "subject": "Math", "teacher_id": 5},
+            {"day": "Monday", "period": 2, "class_name": "9-A", "subject": "Sports", "teacher_id": 6},
+            {"day": "Monday", "period": 3, "class_name": "10-A", "subject": "Physics", "teacher_id": 2},
+            {"day": "Monday", "period": 3, "class_name": "10-B", "subject": "English", "teacher_id": 3}
+        ])
+        df.to_excel(SCHEDULE_FILE, index=False)
         
-    conn.close()
+    if not os.path.exists(SUBSTITUTIONS_FILE) or os.path.getsize(SUBSTITUTIONS_FILE) == 0:
+        df = pd.DataFrame(columns=["date", "period", "class_name", "original_teacher_id", "sub_teacher_id", "reason"])
+        df.to_excel(SUBSTITUTIONS_FILE, index=False)
 
-def get_connection():
-    return sqlite3.connect(DB_FILE)
+def load_table(filename):
+    try:
+        return pd.read_excel(filename)
+    except Exception:
+        return pd.DataFrame()
+
+def save_table(df, filename):
+    df.to_excel(filename, index=False)
