@@ -9,6 +9,7 @@ def init_db():
     """Ensures directories and template files exist with basic fallback data."""
     os.makedirs("data", exist_ok=True)
     
+    # 🩹 MINIMAL FIX: Check if file doesn't exist OR if it is completely empty
     if not os.path.exists(TEACHERS_FILE) or os.path.getsize(TEACHERS_FILE) == 0:
         df = pd.DataFrame([
             {"id": 1, "name": "Mr. Sharma", "subject": "Math", "max_daily_load": 5},
@@ -20,6 +21,7 @@ def init_db():
         ])
         df.to_excel(TEACHERS_FILE, index=False)
         
+    # 🩹 MINIMAL FIX: Check if file doesn't exist OR if it is completely empty
     if not os.path.exists(SCHEDULE_FILE) or os.path.getsize(SCHEDULE_FILE) == 0:
         df = pd.DataFrame([
             {"day": "Monday", "period": 1, "class_name": "10-A", "subject": "Math", "teacher_id": 1},
